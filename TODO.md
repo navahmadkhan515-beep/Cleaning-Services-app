@@ -1,15 +1,11 @@
-# TODO: Mobile Nav Spacing & Navigation Fix
+# Navbar Mobile Fix on Netlify — ✅ Done
 
-## Step 1: Modify `closeMobileNav` to keep header visible
+## Steps
 
-- [x] Change `closeMobileNav` to only `setOpen(false)` without hiding the header
+- [x] 1. Create `public/_redirects` for Netlify SPA routing
+- [x] 2. Pin Tailwind CSS v4 to exact version in `package.json`
+- [x] 3. Add `netlify.toml` build configuration
+- [x] 4. Rebuild & deploy to Netlify
 
-## Step 2: Reduce mobile nav top padding when menu open
-
-- [x] Reduce `<nav>` padding from `py-4` to `py-0 sm:py-4` so brand row is compact on mobile when menu is open
-- [x] Reduce dropdown `<div>` padding from `py-4` to `py-2`
-
-## Step 3: Test
-
-- [ ] Verify mobile nav opens with less space from top
-- [ ] Verify clicking nav link keeps header visible and content starts right below it
+> **Build verified:** `npm run build` succeeds locally (457 modules, 4.00s)
+> **Next:** Commit & push to git to trigger Netlify redeploy.

@@ -1,14 +1,15 @@
-# Project Tasks
+# TODO: Mobile Nav Spacing & Navigation Fix
 
-## Add Animated Background to All Pages
+## Step 1: Modify `closeMobileNav` to keep header visible
 
-- [x] 1. Read all page files and layout components to understand the structure
-- [x] 2. Create `src/components/ui/AnimatedBackground.jsx`
-- [x] 3. Edit `src/components/layout/Layout.jsx` - Integrate AnimatedBackground
-- [x] 4. Verify build compiles
+- [x] Change `closeMobileNav` to only `setOpen(false)` without hiding the header
 
-## Scroll to Top on Navigation
+## Step 2: Reduce mobile nav top padding when menu open
 
-- [x] 1. Create `src/components/common/ScrollToTop.jsx` - Scrolls to top on route change
-- [x] 2. Edit `src/components/layout/Layout.jsx` - Integrate ScrollToTop into layout
-- [x] 3. Verify build compiles
+- [x] Reduce `<nav>` padding from `py-4` to `py-0 sm:py-4` so brand row is compact on mobile when menu is open
+- [x] Reduce dropdown `<div>` padding from `py-4` to `py-2`
+
+## Step 3: Test
+
+- [ ] Verify mobile nav opens with less space from top
+- [ ] Verify clicking nav link keeps header visible and content starts right below it

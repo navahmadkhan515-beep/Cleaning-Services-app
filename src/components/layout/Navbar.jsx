@@ -15,10 +15,9 @@ const Navbar = () => {
   const [open, setOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
 
-  // On mobile: close the menu and hide the header bar
+  // On mobile: close the menu only — keep the header visible
   const closeMobileNav = () => {
     setOpen(false);
-    setTimeout(() => setIsVisible(false), 250);
   };
 
   // Toggle mobile menu – opens the bar if hidden, or closes everything
@@ -79,7 +78,7 @@ const Navbar = () => {
           isVisible ? "translate-y-0" : "-translate-y-full"
         }`}
       >
-        <nav className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4 sm:px-8">
+        <nav className="mx-auto flex max-w-6xl items-center justify-between px-5 py-0 sm:py-4 sm:px-8">
           <Link
             to="/"
             className="flex items-center gap-2"
@@ -142,7 +141,7 @@ const Navbar = () => {
                 onClick={(e) => e.stopPropagation()}
                 className="relative z-20 overflow-hidden border-t border-ink/5 bg-surface md:hidden"
               >
-                <div className="flex flex-col gap-1 px-5 py-4">
+                <div className="flex flex-col gap-1 px-5 py-2">
                   {links.map((link) => (
                     <NavLink
                       key={link.to}

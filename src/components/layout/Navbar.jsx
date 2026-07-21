@@ -14,44 +14,47 @@ const links = [
 const Navbar = () => {
   const [open, setOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
-  const lastScrollY = useRef(0);
 
-  const hideNavbar = () => setIsVisible(false);
-  const showNavbar = () => setIsVisible(true);
+  // On mobile: close the menu and hide the header bar
+  const closeMobileNav = () => {
+    setOpen(false);
+    setTimeout(() => setIsVisible(false), 250);
+  };
 
+  // Toggle mobile menu – opens the bar if hidden, or closes everything
+  const toggleMobileMenu = () => {
+    if (!isVisible) {
+      // Hidden → show bar first, then open menu after slide-in
+      setIsVisible(true);
+      setTimeout(() => setOpen(true), 200);
+    } else if (open) {
+      // Menu open → close menu, then hide bar after its exit animation
+      setOpen(false);
+      setTimeout(() => setIsVisible(false), 250);
+    } else {
+      // Bar visible but menu closed → just open
+      setOpen(true);
+    }
+  };
+
+  // Desktop is always visible; mobile starts hidden
   useEffect(() => {
-    const handleScroll = () => {
-      // Only apply on mobile screens (< 768px)
-      if (window.innerWidth >= 768) {
-        showNavbar();
-        return;
-      }
+    if (window.innerWidth < 768) {
+      setIsVisible(false);
+    }
 
-      const currentScrollY = window.scrollY;
-
-      if (currentScrollY > lastScrollY.current && currentScrollY > 60) {
-        // Scrolling down past threshold -> hide
-        hideNavbar();
-      } else if (currentScrollY < lastScrollY.current) {
-        // Scrolling up -> show
-        showNavbar();
-      }
-
-      lastScrollY.current = currentScrollY;
-    };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-
-    // Re-evaluate when window resizes across breakpoints
     const handleResize = () => {
-      if (window.innerWidth >= 768) showNavbar();
+      if (window.innerWidth >= 768) {
+        setIsVisible(true);
+        setOpen(false);
+      } else {
+        setIsVisible(false);
+        setOpen(false);
+      }
     };
-    window.addEventListener("resize", handleResize, { passive: true });
 
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("resize", handleResize);
-    };
+    window.addEventListener("resize", handleResize, { passive: true });
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   const linkClass = ({ isActive }) =>
@@ -59,124 +62,126 @@ const Navbar = () => {
       isActive ? "text-primary" : "text-muted hover:text-ink"
     }`;
 
-  // Helper: close menu then slide navbar away on mobile link click
-  const handleMobileLinkClick = () => {
-    setOpen(false);
-    // Small delay so the menu close animation plays before header slides
-    setTimeout(() => hideNavbar(), 150);
-  };
-
   return (
-    <header
-      className={`sticky top-0 z-50 bg-surface/90 backdrop-blur border-b border-ink/5 transition-transform duration-300 ${
-        isVisible ? "translate-y-0" : "-translate-y-full"
-      }`}
-    >
-      <nav className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4 sm:px-8">
-        <Link
-          to="/"
-          className="flex items-center gap-2"
-          onClick={() => setOpen(false)}
-        >
-          <span className="h-2.5 w-2.5 rounded-full bg-accent" />
-          <span className="font-display text-lg font-semibold tracking-tight text-ink">
-            Sparkle&nbsp;<span className="text-primary">&amp; Co.</span>
-          </span>
-        </Link>
+    <>
+      {/* ── Floating hamburger button (visible only on mobile) ── */}
+      <button
+        className="fixed right-5 top-4 z-50 flex items-center justify-center rounded-full bg-primary p-2.5 text-white shadow-lg shadow-primary/30 transition hover:bg-primary-dark md:hidden"
+        onClick={toggleMobileMenu}
+        aria-label={open ? "Close menu" : "Open menu"}
+      >
+        {open ? <HiX size={22} /> : <HiMenu size={22} />}
+      </button>
 
-        <div className="hidden items-center gap-8 md:flex">
-          {links.map((link) => (
-            <NavLink
-              key={link.to}
-              to={link.to}
-              className={linkClass}
-              end={link.to === "/"}
-            >
-              {link.label}
-            </NavLink>
-          ))}
-        </div>
-
-        <div className="hidden items-center gap-4 md:flex">
+      {/* ── Header bar (hidden on mobile until triggered) ── */}
+      <header
+        className={`sticky top-0 z-40 bg-surface/95 backdrop-blur border-b border-ink/5 transition-transform duration-300 md:translate-y-0 ${
+          isVisible ? "translate-y-0" : "-translate-y-full"
+        }`}
+      >
+        <nav className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4 sm:px-8">
           <Link
-            to="/login"
-            className="text-sm font-medium text-muted hover:text-ink"
+            to="/"
+            className="flex items-center gap-2"
+            onClick={() => setOpen(false)}
           >
-            Login
+            <span className="h-2.5 w-2.5 rounded-full bg-accent" />
+            <span className="font-display text-lg font-semibold tracking-tight text-ink">
+              Sparkle&nbsp;<span className="text-primary">&amp; Co.</span>
+            </span>
           </Link>
-          <Link
-            to="/book"
-            className="rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-primary/20 transition hover:bg-primary-dark"
-          >
-            Book Now
-          </Link>
-        </div>
 
-        <button
-          className="text-ink md:hidden"
-          onClick={() => setOpen((prev) => !prev)}
-          aria-label="Toggle menu"
-        >
-          {open ? <HiX size={26} /> : <HiMenu size={26} />}
-        </button>
-      </nav>
+          {/* Desktop nav links */}
+          <div className="hidden items-center gap-8 md:flex">
+            {links.map((link) => (
+              <NavLink
+                key={link.to}
+                to={link.to}
+                className={linkClass}
+                end={link.to === "/"}
+              >
+                {link.label}
+              </NavLink>
+            ))}
+          </div>
 
-      <AnimatePresence>
-        {open && (
-          <>
-            {/* Backdrop overlay to close menu when tapping outside */}
-            <div
-              onClick={() => setOpen(false)}
-              className="fixed inset-0 z-10 bg-black/20 md:hidden"
-              aria-hidden="true"
-            />
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.25, ease: "easeInOut" }}
-              onClick={(e) => e.stopPropagation()}
-              className="relative z-20 overflow-hidden border-t border-ink/5 bg-surface md:hidden"
+          {/* Desktop CTA buttons */}
+          <div className="hidden items-center gap-4 md:flex">
+            <Link
+              to="/login"
+              className="text-sm font-medium text-muted hover:text-ink"
             >
-              <div className="flex flex-col gap-1 px-5 py-4">
-                {links.map((link) => (
-                  <NavLink
-                    key={link.to}
-                    to={link.to}
-                    onClick={handleMobileLinkClick}
-                    className={({ isActive }) =>
-                      `rounded-lg px-3 py-2.5 text-sm font-medium ${
-                        isActive
-                          ? "bg-primary/10 text-primary"
-                          : "text-muted hover:bg-base"
-                      }`
-                    }
-                    end={link.to === "/"}
+              Login
+            </Link>
+            <Link
+              to="/book"
+              className="rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-primary/20 transition hover:bg-primary-dark"
+            >
+              Book Now
+            </Link>
+          </div>
+
+          {/* Hidden desktop hamburger (not used – mobile uses floating FAB) */}
+          <button className="hidden" aria-hidden="true" />
+        </nav>
+
+        {/* Mobile menu dropdown */}
+        <AnimatePresence>
+          {open && (
+            <>
+              <div
+                onClick={closeMobileNav}
+                className="fixed inset-0 z-10 bg-black/20 md:hidden"
+                aria-hidden="true"
+              />
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.25, ease: "easeInOut" }}
+                onClick={(e) => e.stopPropagation()}
+                className="relative z-20 overflow-hidden border-t border-ink/5 bg-surface md:hidden"
+              >
+                <div className="flex flex-col gap-1 px-5 py-4">
+                  {links.map((link) => (
+                    <NavLink
+                      key={link.to}
+                      to={link.to}
+                      onClick={closeMobileNav}
+                      className={({ isActive }) =>
+                        `rounded-lg px-3 py-2.5 text-sm font-medium ${
+                          isActive
+                            ? "bg-primary/10 text-primary"
+                            : "text-muted hover:bg-base"
+                        }`
+                      }
+                      end={link.to === "/"}
+                    >
+                      {link.label}
+                    </NavLink>
+                  ))}
+                  <div className="my-2 h-px bg-ink/5" />
+                  <Link
+                    to="/login"
+                    onClick={closeMobileNav}
+                    className="rounded-lg px-3 py-2.5 text-sm font-medium text-muted hover:bg-base"
                   >
-                    {link.label}
-                  </NavLink>
-                ))}
-                <div className="my-2 h-px bg-ink/5" />
-                <Link
-                  to="/login"
-                  onClick={handleMobileLinkClick}
-                  className="rounded-lg px-3 py-2.5 text-sm font-medium text-muted hover:bg-base"
-                >
-                  Login
-                </Link>
-                <Link
-                  to="/book"
-                  onClick={handleMobileLinkClick}
-                  className="mt-1 rounded-full bg-primary px-5 py-2.5 text-center text-sm font-semibold text-white"
-                >
-                  Book Now
-                </Link>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
-    </header>
+                    Login
+                  </Link>
+                  <Link
+                    to="/book"
+                    onClick={closeMobileNav}
+                    className="mt-1 rounded-full bg-primary px-5 py-2.5 text-center text-sm font-semibold text-white"
+                  >
+                    Book Now
+                  </Link>
+                </div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
+      </header>
+    </>
   );
 };
 

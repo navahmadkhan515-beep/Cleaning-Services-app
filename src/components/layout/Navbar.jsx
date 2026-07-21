@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { HiMenu, HiX } from "react-icons/hi";
 import { motion, AnimatePresence } from "framer-motion";
@@ -13,11 +13,14 @@ const links = [
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
-  const [isVisible, setIsVisible] = useState(true);
+  const [isVisible, setIsVisible] = useState(() => window.innerWidth >= 768);
 
-  // On mobile: close the menu only — keep the header visible
+  // On mobile: close the menu, then hide the header bar after exit animation
   const closeMobileNav = () => {
     setOpen(false);
+    if (window.innerWidth < 768) {
+      setTimeout(() => setIsVisible(false), 250);
+    }
   };
 
   // Toggle mobile menu – opens the bar if hidden, or closes everything
@@ -38,10 +41,6 @@ const Navbar = () => {
 
   // Desktop is always visible; mobile starts hidden
   useEffect(() => {
-    if (window.innerWidth < 768) {
-      setIsVisible(false);
-    }
-
     const handleResize = () => {
       if (window.innerWidth >= 768) {
         setIsVisible(true);
